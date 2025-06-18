@@ -1,0 +1,82 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background-color: #b30000;
+  color: #333;
+}
+
+header {
+  text-align: center;
+  padding: 20px;
+  background-color: #b30000;
+  color: #000000;
+}
+
+#calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  padding: 20px;
+}
+
+.day-box {
+  background-color: #b30000;
+  border: 2px solid #000000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
+  padding: 10px;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.2s;
+}
+
+.day-box:hover {
+  /*transform: scale(0.90);*/
+  background-color: #b30000;
+  border: 1px solid #b30000;
+  border: 2px solid #ffe600;
+}
+
+.day-box .days-remaining {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #ffffff;
+  transition: all 0.3s ease-in-out;
+}
+
+.day-box .date-text {
+  font-size: 0.75em;
+  position: absolute;
+  bottom: 5px;
+  text-align: center;
+  width: 100%;
+}
+
+/* Modal Styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 999;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.8);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal video {
+  max-width: 90%;
+  max-height: 90%;
+}
+
+.close {
+  position: absolute;
+  top: 20px; right: 30px;
+  color: #fff;
+  font-size: 30px;
+  cursor: pointer;
+}
