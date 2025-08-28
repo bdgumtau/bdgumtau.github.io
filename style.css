@@ -1,25 +1,45 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body, html {
-  height: 100%;
-  font-family: Arial, sans-serif;
-  background-color: #111;
-}
-
-.container {
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #121212;
+  color: #f4f4f4;
   display: flex;
-  justify-content: center;  /* Center horizontally */
-  align-items: center;      /* Center vertically */
+  justify-content: center;
+  align-items: center;
   height: 100vh;
-  background-color: #111;
+  margin: 0;
+}
+
+.countdown-container {
   text-align: center;
 }
 
-h1 {
-  font-size: 5rem;
-  color: #fff;
+#countdown {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+#countdown div {
+  background: #1e1e1e;
+  padding: 20px;
+  border-radius: 10px;
+  min-width: 80px;
+}
+
+#countdown span:first-child {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+#countdown span:last-child {
+  font-size: 1rem;
+  color: #999;
+}
+
+#message {
+  margin-top: 30px;
+  font-size: 1.2rem;
+  color: #4caf50;
 }
