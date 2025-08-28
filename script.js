@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const startDate = new Date("2024-12-07T00:00:00");
+  const startDate = new Date("2024-12-08T00:00:00");
   const endDate = new Date("2025-12-06T23:59:59");
 
   const daysEl = document.getElementById("days");
@@ -47,4 +47,5 @@ document.addEventListener("DOMContentLoaded", function () {
 
 const startDate = new Date("2025-08-01T00:00:00");
 const endDate = new Date("2025-09-30T23:59:59");
+
 
