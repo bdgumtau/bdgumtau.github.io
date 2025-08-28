@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     if (now > endDate) {
-      messageEl.textContent = "The countdown has ended.";
+      messageEl.textContent = "Time to get pissed!";
       setCountdownValues(0, 0, 0, 0);
       return;
     }
@@ -47,3 +47,4 @@ document.addEventListener("DOMContentLoaded", function () {
 
 const startDate = new Date("2025-08-01T00:00:00");
 const endDate = new Date("2025-09-30T23:59:59");
+
