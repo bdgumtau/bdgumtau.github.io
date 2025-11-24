@@ -3,24 +3,64 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Countdown Timer</title>
+  <title>CRATE DAY 2025</title>
   <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="countdown-container">
-    <h1></h1>
-    <div id="countdown">
-      <div><span id="days">0</span><span>Days</span></div>
-      <div><span id="hours">0</span><span>Hours</span></div>
-      <div><span id="minutes">0</span><span>Minutes</span></div>
-      <div><span id="seconds">0</span><span>Seconds</span></div>
-    </div>
-    <p id="message"></p>
+  
+  <img src="images/top-left-1.png" class="corner-image top-left" alt="Top Left Decoration" />
+  <img src="images/top-left-2.png" class="corner-image top-left-2" alt="Top Left Decoration 2" />
+  <img src="images/top-left-3.png" class="corner-image top-left-3" alt="Top Left Decoration 3" />
+  <img src="images/top-left-4.png" class="corner-image top-left-4" alt="Top Left Decoration 4" />
+  <img src="images/top-left-5.png" class="corner-image top-left-5" alt="Top Left Decoration 5" />
+  <img src="images/top-left-6.png" class="corner-image top-left-6" alt="Top Left Decoration 6" />
+  
+  <img src="images/top-right-1.png" class="corner-image top-right" alt="Top Right Decoration" />
+  <img src="images/top-right-2.png" class="corner-image top-right-2" alt="Top Right Decoration 2" />
+  <img src="images/top-right-3.png" class="corner-image top-right-3" alt="Top Right Decoration 3" />
+  <img src="images/top-right-4.png" class="corner-image top-right-4" alt="Top Right Decoration 4" />
+  <img src="images/top-right-5.png" class="corner-image top-right-5" alt="Top Right Decoration 5" />
+  <img src="images/top-right-6.png" class="corner-image top-right-6" alt="Top Right Decoration 6" />
+  
+  <audio id="clickSound" src="sounds/click.mp3" preload="auto"></audio>
+  <audio id="errorSound" src="sounds/error.mp3" preload="auto"></audio>
+
+  <div id="dayCounter">
+    <span id="dayCount">0</span>
   </div>
 
+  <!-- Add this div for the mirrored countdown on the right side -->
+  <div id="inverseCounter">
+    <span id="inverseCount">363</span>
+  </div>
+
+  <header>
+    <h1>CRATE DAY 2025</h1>
+    <p>a year in the making</p>
+  </header>
+
+  <main id="calendar"></main>
+
+  <div id="videoModal" class="modal">
+    <span class="close">&times;</span>
+    <video id="dateVideo" controls></video>
+  </div>
+
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="spinner"></div>
+  </div>
+
+<!-- Secret Video Modal -->
+<div id="secretModal" class="modal">
+  <span class="close">&times;</span>
+  <video id="secretVideo" controls></video>
+</div>
+
+<!-- Button to trigger the secret video -->
+<button id="secretButton" style="display: none;">Watch Secret Video</button>
+
   <script src="script.js"></script>
+
 </body>
 </html>
-
-
-
