@@ -104,7 +104,7 @@ while (currentDate <= endDate) {
         });
 
         videoElement.onended = () => {
-          if (watchedDays.length === 3 && !localStorage.getItem(secretPlayedKey)) {
+          if (watchedDays.length === 363 && !localStorage.getItem(secretPlayedKey)) {
             setTimeout(() => {
               triggerEasterEgg();
             }, 500);
