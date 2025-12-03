@@ -365,7 +365,8 @@ document.addEventListener('DOMContentLoaded', () => {
 "2025-11-29":	"	https://drive.google.com/file/d/1JD7T0PJHfasUGeFfNoJCUfe2IlTVIycH/preview "	,    
 "2025-11-30":	"	https://drive.google.com/file/d/1XnjzWRYPp-QB23l_V1f8Ln7whCLBou1Q/preview "	,    
 "2025-12-01":	" https://drive.google.com/file/d/1rcV_iq3i3GEafWYBIFtbhRycg9jCtfU8/preview "	,
-"2025-12-02":	" https://drive.google.com/file/d/1FrdqYFnTgpHleu1sc3YqVQktIR0cMmxo/preview "	,      
+"2025-12-02":	" https://drive.google.com/file/d/1FrdqYFnTgpHleu1sc3YqVQktIR0cMmxo/preview "	, 
+"2025-12-03":	" https://drive.google.com/file/d/1KIyv3UUBIXLdnhJOQuYdQgdt35bYJijc/preview "	, 
     // Add your own dates and URLs here...
   };
 
@@ -604,6 +605,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   setInterval(cycleCursor, 100);
 });
+
 
 
 
