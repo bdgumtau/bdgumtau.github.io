@@ -1,12 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
   // ------------------------------------------------------------
   //  VIDEO LINK MAP
-  //  Ensure these are Google Drive preview URLs as mentioned earlier:
-  //  Example: "https://drive.google.com/file/d/FILE_ID/preview"
   // ------------------------------------------------------------
-
   const videoLinks = {
-    "2024-12-08":	"	https://drive.google.com/file/d/1xKKeQg69LAtsFKcZo6HMU07VCeEyoEsD/preview	"	,
+    
+     "2024-12-08":	"	https://drive.google.com/file/d/1xKKeQg69LAtsFKcZo6HMU07VCeEyoEsD/preview	"	,
 "2024-12-09":	"	https://drive.google.com/file/d/1Gff71QFwbQhLD7dY5f9NaF34VVj4YnHP/preview	"	,
 "2024-12-10":	"	https://drive.google.com/file/d/1-6osyLnHikqYdjiDzm3kefWczusv89ab/preview	"	,
 "2024-12-11":	"	https://drive.google.com/file/d/1NXtY2NzgBZVER6qP-3IwnsHue_kG4Gf_/preview	"	,
@@ -367,18 +365,19 @@ document.addEventListener('DOMContentLoaded', () => {
 "2025-12-01":	" https://drive.google.com/file/d/1rcV_iq3i3GEafWYBIFtbhRycg9jCtfU8/preview "	,
 "2025-12-02":	" https://drive.google.com/file/d/1FrdqYFnTgpHleu1sc3YqVQktIR0cMmxo/preview "	, 
 "2025-12-03":	" https://drive.google.com/file/d/1KIyv3UUBIXLdnhJOQuYdQgdt35bYJijc/preview "	, 
-    // Add your own dates and URLs here...
+    
+    // Add your dates + video links here...
   };
 
   // ------------------------------------------------------------
-  //  HELPER: Convert Drive URL to preview URL (iframe-friendly)
+  //  HELPER: Convert Drive URL to preview URL
   // ------------------------------------------------------------
   function convertDriveLinkToPreview(link) {
     if (!link) return null;
     const match = link.match(/\/d\/(.*?)\//);
     if (!match) return null;
     const fileID = match[1];
-    return `https://drive.google.com/file/d/${fileID}/preview`; // This is the format needed for iframe
+    return `https://drive.google.com/file/d/${fileID}/preview`;
   }
 
   // ------------------------------------------------------------
@@ -403,6 +402,19 @@ document.addEventListener('DOMContentLoaded', () => {
   inverseCountDisplay.textContent = 364 - watchedDays.length;
 
   // ------------------------------------------------------------
+  // SECRET VIDEO BUTTON
+  // ------------------------------------------------------------
+  const secretButton = document.getElementById("secretButton");
+  const secretPlayedKey = "secretPlayed";
+
+  // Initially hide the button unless previously unlocked
+  if (localStorage.getItem(secretPlayedKey) === "unlocked") {
+    secretButton.style.display = "block";
+  } else {
+    secretButton.style.display = "none";
+  }
+
+  // ------------------------------------------------------------
   //  BUILD CALENDAR
   // ------------------------------------------------------------
   let currentDate = new Date(startDate);
@@ -420,34 +432,24 @@ document.addEventListener('DOMContentLoaded', () => {
     box.style.backgroundSize = "contain";
     box.style.backgroundRepeat = "no-repeat";
     box.style.backgroundPosition = "center";
-
     box.innerHTML = `<div class="days-remaining">${daysRemaining}</div>`;
 
     if (watchedDays.includes(dateString)) {
       box.classList.add("watched");
     }
 
-    // ----------------------
-    //  CLICK → OPEN MODAL
-    // ----------------------
+    // CLICK → OPEN VIDEO MODAL
     box.onclick = () => {
-      console.log(`Clicked on date: ${dateString}`); // Debugging: log the clicked date
       const driveLink = videoLinks[dateString];
       const previewLink = convertDriveLinkToPreview(driveLink);
 
-      // Remove any previous error messages
       const oldMessage = document.getElementById("errorMessage");
       if (oldMessage) oldMessage.remove();
 
-      // Hide video element if it's visible
       const videoElement = document.getElementById("dateVideo");
-      if (videoElement) {
-        videoElement.style.display = "none";
-      }
+      if (videoElement) videoElement.style.display = "none";
 
-      // No video linked for this date
       if (!previewLink) {
-        console.log("No video linked for this date"); // Debugging: log if no video is linked
         const errorMsg = document.createElement("div");
         errorMsg.id = "errorMessage";
         errorMsg.style.color = "white";
@@ -460,7 +462,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Create or reuse iframe for the video
       let iframe = document.getElementById("videoIframe");
       if (!iframe) {
         iframe = document.createElement("iframe");
@@ -472,19 +473,16 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.appendChild(iframe);
       }
 
-      // Set iframe source to the video URL
       iframe.src = previewLink;
-      iframe.style.display = "block"; // Show the iframe
+      iframe.style.display = "block";
 
-      // Show modal and hide loader immediately
       modal.style.display = "flex";
       loadingOverlay.style.display = "none";
 
-      // Play the click sound
       clickSound.currentTime = 0;
       clickSound.play().catch(() => {});
 
-      // Mark the day as watched
+      // Mark as watched
       if (!watchedDays.includes(dateString)) {
         watchedDays.push(dateString);
         localStorage.setItem(watchedDaysKey, JSON.stringify(watchedDays));
@@ -500,7 +498,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ------------------------------------------------------------
-  //  CLOSE MODAL
+  //  CLOSE MODAL + UNLOCK SECRET VIDEO
   // ------------------------------------------------------------
   const closeBtn = modal.querySelector(".close");
   closeBtn.onclick = closeModal;
@@ -510,79 +508,51 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   function closeModal() {
-    // Hide modal
     modal.style.display = "none";
     loadingOverlay.style.display = "none";
 
-    // Stop the video from playing
     const iframe = document.getElementById("videoIframe");
     if (iframe) {
-      // Reset the iframe source to stop the video
       iframe.src = "";
-      iframe.style.display = "none"; // Hide the iframe
-    }
-
-    const secretIframe = document.getElementById("secretIframe");
-    if (secretIframe) {
-      // Reset the iframe source to stop the secret video
-      secretIframe.src = "";
-      secretIframe.style.display = "none"; // Hide the iframe
-    }
-
-    // Optionally, stop any background audio (if needed)
-    const videoElement = document.getElementById("dateVideo");
-    if (videoElement) {
-      videoElement.pause();
-      videoElement.src = "";  // Clear the source
+      iframe.style.display = "none";
     }
 
     const oldMessage = document.getElementById("errorMessage");
     if (oldMessage) oldMessage.remove();
+
+    // Unlock secret button only after all 364 videos watched
+    if (
+      watchedDays.length >= 364 &&
+      localStorage.getItem(secretPlayedKey) !== "unlocked"
+    ) {
+      secretButton.style.display = "block";
+      localStorage.setItem(secretPlayedKey, "unlocked");
+    }
   }
 
   // ------------------------------------------------------------
-  //  SECRET VIDEO
+  // SECRET VIDEO CLICK
   // ------------------------------------------------------------
-  const secretModal = document.getElementById("secretModal");
-  const secretButton = document.getElementById("secretButton");
-  const secretPlayedKey = "secretPlayed";
-
   secretButton.onclick = () => {
+    // Hide the button while secret video plays
     secretButton.style.display = "none";
 
-    const secretDriveLink = "YOUR_SECRET_DRIVE_LINK_HERE";
+    // Replace this with your actual Google Drive preview link
+    const secretDriveLink = "https://drive.google.com/file/d/1odAXygq0wm8UGzDTNjIEHlfeFa6gED_K/preview";
+
     const secretPreviewLink = convertDriveLinkToPreview(secretDriveLink);
 
-    // Hide old video
-    const secretVideo = document.getElementById("secretVideo");
-    secretVideo.style.display = "none";
-
-    let iframe = document.getElementById("secretIframe");
-    if (!iframe) {
-      iframe = document.createElement("iframe");
-      iframe.id = "secretIframe";
-      iframe.style.width = "90%";
-      iframe.style.height = "90%";
-      iframe.style.border = "none";
-      iframe.allow = "autoplay";
-      secretModal.appendChild(iframe);
+    if (!secretPreviewLink) {
+      alert("Secret video link is invalid. Fix your Drive link.");
+      return;
     }
 
+    let iframe = document.getElementById("videoIframe");
     iframe.src = secretPreviewLink;
     iframe.style.display = "block";
-    secretModal.style.display = "flex";
-  };
 
-  secretModal.querySelector(".close").onclick = () => {
-    secretModal.style.display = "none";
-
-    // Hide iframe
-    const iframe = document.getElementById("secretIframe");
-    if (iframe) iframe.style.display = "none";
-
-    const secretVideo = document.getElementById("secretVideo");
-    secretVideo.pause();
-    secretVideo.src = "";
+    // Show the modal
+    modal.style.display = "flex";
   };
 
   // ------------------------------------------------------------
@@ -605,12 +575,3 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   setInterval(cycleCursor, 100);
 });
-
-
-
-
-
-
-
-
-
