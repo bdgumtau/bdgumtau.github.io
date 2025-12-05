@@ -367,6 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
 "2025-12-03":	" https://drive.google.com/file/d/1KIyv3UUBIXLdnhJOQuYdQgdt35bYJijc/preview "	, 
 "2025-12-04":	" https://drive.google.com/file/d/1q06eH2jm5h-ogPUIKZUMq6rgg4HlxZML/preview "	, 
 "2025-12-05":	" https://drive.google.com/file/d/1OjAv3XL3QOPQacnVrW-5PZzDienbbQin/preview "	,        
+"2025-12-06":	" https://drive.google.com/file/d/1Q6NczFIW9iUaaJ9CnNF95cfSKqIhhY_0/preview "	,    
     // Add your dates + video links here...
   };
 
@@ -576,5 +577,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   setInterval(cycleCursor, 100);
 });
+
 
 
