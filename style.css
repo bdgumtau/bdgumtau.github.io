@@ -1,25 +1,117 @@
+/* ==========================================
+   RESET
+   ========================================== */
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-body, html {
+
+/* ==========================================
+   PAGE
+   ========================================== */
+
+html,
+body {
+  width: 100%;
   height: 100%;
-  font-family: Arial, sans-serif;
-  background-color: #111;
+
+  overflow: hidden;
+
+  background-color: black;
 }
+
+
+/* ==========================================
+   MAIN CONTAINER
+   ========================================== */
 
 .container {
-  display: flex;
-  justify-content: center;  /* Center horizontally */
-  align-items: center;      /* Center vertically */
+  position: relative;
+
+  width: 100vw;
   height: 100vh;
-  background-color: #111;
-  text-align: center;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  overflow: hidden;
 }
 
-h1 {
-  font-size: 5rem;
-  color: #fff;
+
+/* ==========================================
+   BACKGROUND IMAGE
+   ========================================== */
+
+#switchingImage {
+  position: absolute;
+
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+
+  z-index: 1;
+}
+
+
+/* ==========================================
+   CRATE DAY TITLE
+   ========================================== */
+
+.title {
+  position: absolute;
+
+  top: 50%;
+  left: 50%;
+
+  transform: translate(-50%, -50%);
+
+  width: 100%;
+
+  z-index: 10;
+
+  text-align: center;
+
+  font-family: Arial, sans-serif;
+
+  font-size: 10vw;
+
+  font-weight: 900;
+
+  white-space: nowrap;
+
+  color: white;
+
+  text-shadow:
+    4px 4px 10px black,
+    0 0 15px black;
+
+  pointer-events: none;
+}
+
+
+/* ==========================================
+   INDIVIDUAL LETTERS
+   ========================================== */
+
+.title span {
+  display: inline-block;
+
+  color: white;
+
+  transition: color 0.1s ease;
+}
+
+
+/* SPACES */
+
+.title span.space {
+  width: 0.3em;
 }
