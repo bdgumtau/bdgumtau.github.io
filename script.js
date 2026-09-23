@@ -5,8 +5,8 @@
 const imageElement = document.getElementById("switchingImage");
 
 const images = [
-  "images/image1.jpeg",
-  "images/image2.jpeg"
+  "images/Image1.jpeg",
+  "images/Image2.jpeg"
 ];
 
 let currentImage = 0;
