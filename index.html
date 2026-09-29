@@ -214,6 +214,12 @@
   .tally li.bump{animation:bump .45s cubic-bezier(.2,1.6,.4,1)}
   @keyframes bump{0%{transform:scale(1)}35%{transform:scale(1.12) rotate(-2deg);border-color:var(--gold)}100%{transform:scale(1)}}
   .tally-btns{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:18px}
+  .volhint{margin-top:12px;font-size:.58rem;letter-spacing:.22em;color:var(--muted3)}
+  /* music & sounds buttons double as volume sliders: the filled part of the button is the volume */
+  .tally .toggle[data-vol]{touch-action:pan-y;-webkit-user-select:none;user-select:none;min-width:150px;
+    background:linear-gradient(90deg,var(--btn) var(--p,100%),rgba(var(--black-rgb),.55) var(--p,100%))}
+  .tally .toggle[data-vol][aria-pressed="false"]{background:linear-gradient(90deg,rgba(255,255,255,.07) var(--p,100%),transparent var(--p,100%))}
+  .tally .toggle[data-vol].sliding{cursor:ew-resize;border-color:var(--white)}
   .tally .toggle{-webkit-appearance:none;appearance:none;background:var(--btn);border:2px solid var(--btn-hi);color:var(--white);font:inherit;font-size:.72rem;letter-spacing:.25em;padding:8px 16px;border-radius:20px;cursor:pointer;transition:background .25s,border-color .25s,color .25s}
   .tally .toggle span{color:var(--btn-hi)}
   .tally .toggle[aria-pressed="false"]{background:none;border-color:var(--line2);color:var(--muted)}
@@ -306,7 +312,11 @@
   .slot.soon img{filter:grayscale(1) brightness(.18)}
   .slot b{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);font:400 1.05rem/1 "Anton",Impact,sans-serif;color:var(--white);text-shadow:0 2px 6px #000;letter-spacing:.04em}
   .slot small{position:absolute;left:0;right:0;bottom:8px;font-size:.52rem;letter-spacing:.14em;color:var(--muted2)}
-  .slot i{position:absolute;right:4px;top:4px;font:normal 400 .7rem/1 "Anton",Impact,sans-serif;padding:3px 5px;border-radius:9px;background:var(--red);color:var(--white)}
+  /* badges are sized from the card's own width, so they scale exactly with it when flying between the row and View All */
+  .slot{container-type:inline-size}
+  .slot em{position:absolute;left:50%;top:90.2%;z-index:1;width:11cqw;height:11cqw;margin:-5.5cqw 0 0 -5.5cqw;border-radius:50%;display:grid;place-items:center;
+    font:normal 400 7cqw/1 "Anton",Impact,sans-serif;background:var(--red);color:var(--white);box-shadow:0 .6cqw 1.8cqw rgba(0,0,0,.45)}   /* sits over the drop emblem, clear of the title */
+  .slot i{position:absolute;right:3cqw;top:3cqw;font:normal 400 7cqw/1 "Anton",Impact,sans-serif;padding:1.6cqw 2.6cqw;border-radius:6cqw;background:var(--red);color:var(--white)}
   .slot.gold-slot.got{box-shadow:0 0 22px rgba(255,210,70,.6)}
   .slot[hidden]{display:none}
   .slot.fresh{animation:bump .6s cubic-bezier(.2,1.6,.4,1)}
@@ -515,7 +525,7 @@
 </section>
 
 <footer>
-  <div class="tally" id="tally"><h4>THE PISS TALLY</h4><div class="sub">STANDARDS KNOCKED BACK: <span id="tallyTotal">0.0</span></div><ul id="tallyList"></ul><div class="ach"><h4>ACHIEVEMENTS</h4><div class="sub">UNLOCKED: <span id="achCount">0 / 0</span></div><div class="badges" id="badges"></div></div><div class="tally-btns"><button class="toggle" id="themeToggle" type="button" aria-pressed="true">BEER: <span>LION RED</span></button><button class="toggle" type="button" data-music aria-pressed="true">MUSIC: <span>ON</span></button><button class="toggle" id="gogToggle" type="button" aria-pressed="true">BEER GOGGLES: <span>ON</span></button><button class="toggle" id="boToggle" type="button" aria-pressed="true">BLACKOUTS: <span>ON</span></button><button class="reset" id="tallyReset" type="button">RESET THE PISS TALLY</button><button class="reset" id="achReset" type="button">RESET ACHIEVEMENTS</button><button class="reset" id="tabReset" type="button" hidden>RESET THE TAB</button></div></div>
+  <div class="tally" id="tally"><h4>THE PISS TALLY</h4><div class="sub">STANDARDS KNOCKED BACK: <span id="tallyTotal">0.0</span></div><ul id="tallyList"></ul><div class="ach"><h4>ACHIEVEMENTS</h4><div class="sub">UNLOCKED: <span id="achCount">0 / 0</span></div><div class="badges" id="badges"></div></div><div class="tally-btns"><button class="toggle" id="themeToggle" type="button" aria-pressed="true">BEER: <span>LION RED</span></button><button class="toggle" type="button" data-music data-vol="music" aria-pressed="true">MUSIC: <span>ON</span></button><button class="toggle" id="sfxToggle" data-vol="sfx" type="button" aria-pressed="true">SOUNDS: <span>ON</span></button><button class="toggle" id="gogToggle" type="button" aria-pressed="true">BEER GOGGLES: <span>ON</span></button><button class="toggle" id="boToggle" type="button" aria-pressed="true">BLACKOUTS: <span>ON</span></button><button class="reset" id="tallyReset" type="button">RESET THE PISS TALLY</button><button class="reset" id="achReset" type="button">RESET ACHIEVEMENTS</button><button class="reset" id="tabReset" type="button" hidden>RESET THE TAB</button></div><div class="volhint">TAP TO SWITCH ON / OFF · SLIDE ACROSS MUSIC OR SOUNDS FOR VOLUME</div></div>
   <span id="footMark"><b>CRATE DAY</b> 2026</span>
 </footer>
 
@@ -740,13 +750,17 @@
 
   // ---------- drink sounds, synthesised on the fly (no audio files needed) ----------
   const SFX = (() => {
-    let ctx = null, out = null, noiseBuf = null;
+    let ctx = null, out = null, musicBus = null, noiseBuf = null;
+    let sfxOn = true, sfxVol = 1;
+    try { sfxOn = localStorage.getItem('crateday-sounds') !== 'off'; const v = parseFloat(localStorage.getItem('crateday-sfxvol')); if (!isNaN(v)) sfxVol = v; } catch (e) {}
+    const level = () => sfxOn ? 0.9 * sfxVol : 0;
     function ensure(){                                         // must first run inside a tap (iPhone rule)
       if (!ctx) {
         const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null;
         ctx = new AC();
         const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 6;
-        out = ctx.createGain(); out.gain.value = 0.9; out.connect(comp); comp.connect(ctx.destination);
+        out = ctx.createGain(); out.gain.value = level(); out.connect(comp); comp.connect(ctx.destination);
+        musicBus = ctx.createGain(); musicBus.gain.value = 1; musicBus.connect(comp);   // music has its own volume, separate from the sound effects
         noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
         const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
       }
@@ -845,6 +859,9 @@
     };
     return {
       unlock(){ ensure(); },
+      setOn(v){ sfxOn = v; try { localStorage.setItem('crateday-sounds', v ? 'on' : 'off'); } catch (e) {} if (out) out.gain.setTargetAtTime(level(), ctx.currentTime, .05); },
+      setVol(v){ sfxVol = v; try { localStorage.setItem('crateday-sfxvol', String(v)); } catch (e) {} if (out) out.gain.setTargetAtTime(level(), ctx.currentTime, .05); },
+      isOn: () => sfxOn, vol: () => sfxVol, _musicOut: () => musicBus,
       cap(){ if (ensure()) sounds.cap(ctx.currentTime + .005); },
       vomit(){ if (ensure()) sounds.vomit(ctx.currentTime + .01); },
       achieve(){ if (ensure()) sounds.achieve(ctx.currentTime + .01); },
@@ -861,6 +878,7 @@
 
   // ---------- background music: a softened loop of the track that reacts to the drinking ----------
   const MUSIC = (() => {
+    let mVol = 1; try { const v = parseFloat(localStorage.getItem('crateday-musicvol')); if (!isNaN(v)) mVol = v; } catch (e) {}
     const KEY = 'crateday-music', BASE = 0.32, el = document.getElementById('bgm');
     let on = true; try { on = localStorage.getItem(KEY) !== 'off'; } catch (e) {}
     let routed = false, filt = null, gain = null, duck = 1, muffle = 1, lastF = 0, lastG = -1;
@@ -872,15 +890,15 @@
         const src = ctx.createMediaElementSource(el);
         filt = ctx.createBiquadFilter(); filt.type = 'lowpass'; filt.frequency.value = 20000; filt.Q.value = 0.7;
         gain = ctx.createGain(); gain.gain.value = 0;
-        src.connect(filt); filt.connect(gain); gain.connect(SFX._out());   // shares the compressor, so drink sounds push it down a touch
+        src.connect(filt); filt.connect(gain); gain.connect(SFX._musicOut());   // shares the compressor, so drink sounds push it down a touch
         routed = true;
       } catch (e) { routed = false; }
       return routed;
     }
     function apply(){                                          // only touch the audio graph when values actually change
-      if (!routed) { el.volume = on ? Math.min(1, BASE * 2.2 * duck) : 0; return; }
+      if (!routed) { el.volume = on ? Math.min(1, BASE * 2.2 * duck * mVol) : 0; return; }
       const ctx = SFX._ctx(), t = ctx.currentTime;
-      const g = on ? BASE * duck : 0, f = Math.round(20000 * Math.pow(muffle, 2.2) + 250);
+      const g = on ? BASE * duck * mVol : 0, f = Math.round(20000 * Math.pow(muffle, 2.2) + 250);
       if (Math.abs(g - lastG) > .004) { lastG = g; gain.gain.cancelScheduledValues(t); gain.gain.setTargetAtTime(g, t, .25); }
       if (Math.abs(f - lastF) > 40) { lastF = f; filt.frequency.cancelScheduledValues(t); filt.frequency.setTargetAtTime(f, t, .15); }
     }
@@ -903,9 +921,37 @@
     });
     render();
     return {
+      setVol(v){ mVol = v; try { localStorage.setItem('crateday-musicvol', String(v)); } catch (e) {} apply(); }, vol: () => mVol,
       setMuffle(v){ muffle = Math.max(0.02, Math.min(1, v)); apply(); },   // 1 = clear, lower = sounds like it's through a wall
       setDuck(v){ duck = v; apply(); if (v === 0) setTimeout(() => { if (duck === 0) el.pause(); }, 800); else if (on && routed && el.paused) el.play().catch(() => {}); }
     };
+  })();
+
+  // ---------- sounds switch + volume, built into the Music and Sounds buttons (remembered on this device) ----------
+  (() => {
+    const sfxBtn = document.getElementById('sfxToggle');
+    const renderSfx = () => { const on = SFX.isOn(); sfxBtn.setAttribute('aria-pressed', String(on)); sfxBtn.querySelector('span').textContent = on ? 'ON' : 'OFF'; };
+    renderSfx();
+    sfxBtn.addEventListener('click', e => { e.stopPropagation(); SFX.setOn(!SFX.isOn()); renderSfx(); if (SFX.isOn()) SFX.cap(); });
+    const ctl = { music: { get: () => MUSIC.vol(), set: v => MUSIC.setVol(v), isOn: () => document.querySelector('[data-vol=music]').getAttribute('aria-pressed') === 'true', turnOn: () => document.querySelector('[data-vol=music]').click() },
+                  sfx:   { get: () => SFX.vol(),   set: v => SFX.setVol(v),   isOn: () => SFX.isOn(), turnOn: () => { SFX.setOn(true); renderSfx(); } } };
+    document.querySelectorAll('.tally .toggle[data-vol]').forEach(btn => {
+      const c = ctl[btn.dataset.vol], name = btn.dataset.vol === 'music' ? 'Music' : 'Sounds';
+      const paint = () => { const v = Math.round(c.get() * 100); btn.style.setProperty('--p', v + '%'); btn.title = `${name} volume ${v}% · tap to switch on/off, slide to change`; };
+      paint();
+      let x0 = null, sliding = false;
+      const setFrom = e => { const r = btn.getBoundingClientRect(); c.set(Math.max(0, Math.min(1, (e.clientX - r.left) / r.width))); paint(); };
+      btn.addEventListener('pointerdown', e => { x0 = e.clientX; sliding = false; });
+      btn.addEventListener('pointermove', e => { if (x0 === null) return;
+        if (!sliding && Math.abs(e.clientX - x0) > 6) { sliding = true; btn.classList.add('sliding'); try { btn.setPointerCapture(e.pointerId); } catch (err) {} if (!c.isOn()) c.turnOn(); }
+        if (sliding) setFrom(e); });
+      const end = () => { if (x0 === null) return; x0 = null; if (sliding) { btn.classList.remove('sliding'); if (btn.dataset.vol === 'sfx' && SFX.isOn()) SFX.cap(); } };
+      btn.addEventListener('pointerup', end); btn.addEventListener('pointercancel', end);
+      // a slide isn't a tap: don't let it also switch the sound off
+      btn.addEventListener('click', e => { if (sliding) { sliding = false; e.stopImmediatePropagation(); e.preventDefault(); } }, true);
+      btn.addEventListener('keydown', e => { const d = { ArrowLeft: -.1, ArrowDown: -.1, ArrowRight: .1, ArrowUp: .1 }[e.key]; if (d === undefined) return;
+        e.preventDefault(); c.set(Math.max(0, Math.min(1, Math.round((c.get() + d) * 10) / 10))); paint(); if (btn.dataset.vol === 'sfx' && SFX.isOn()) SFX.cap(); });
+    });
   })();
 
   // Falling beer bottle every so often — click it for beer goggles
@@ -1203,7 +1249,7 @@
   function playVideo(){
     MUSIC.setDuck(0);
     ytActive = true; clearTimeout(wakeT);
-    vid.currentTime = 0; vid.muted = false; vid.volume = 1;
+    vid.currentTime = 0; vid.muted = !SFX.isOn(); vid.volume = Math.max(0, Math.min(1, SFX.vol()));
     const show = () => { if (!ytActive) { vid.pause(); return; } clearTimeout(ytFailT); requestAnimationFrame(() => { if (ytActive) ytBox.classList.add('show'); }); unlock('skyrim'); renderAch(); };
     vid.play().then(show).catch(() => {                        // sound blocked: play muted and offer a tap
       vid.muted = true; vid.play().then(() => { show(); ytSound.hidden = false; }).catch(() => endVideo(true));
@@ -1302,10 +1348,13 @@
   }
   // A drop every 1.4–3 s, so there's nearly always a drink within reach for a 3-second streak;
   // now and then (1 in 4) a second one follows a moment later
+  // test mode can switch the falling drinks / cards off (always on for real visitors)
+  const testFall = { drinks: true, cards: true };
+  if (TEST) try { Object.assign(testFall, JSON.parse(localStorage.getItem('crateday-testfall')) || {}); } catch (e) {}
   function dropWave(){
-    if (Math.random() < (TEST ? 1 / 2 : 1 / 9)) setTimeout(dropCard, 600);   // now and then, a trading card (often, when testing)
+    if (testFall.cards && Math.random() < (TEST ? 1 / 2 : 1 / 9)) setTimeout(dropCard, 600);   // now and then, a trading card (often, when testing)
     const n = Math.random() < 0.25 ? 2 : 1;
-    for (let i = 0; i < n; i++) setTimeout(dropBottle, i * (400 + Math.random() * 500));
+    if (testFall.drinks) for (let i = 0; i < n; i++) setTimeout(dropBottle, i * (400 + Math.random() * 500));
     setTimeout(dropWave, 1400 + Math.random() * 1600);
   }
   if (!reduce) setTimeout(dropWave, 2000);
@@ -1390,6 +1439,11 @@
   const CARDS_KEY = 'crateday-cards';
   let cards = {}; try { cards = JSON.parse(localStorage.getItem(CARDS_KEY)) || {}; } catch (e) {}
   const saveCards = () => { try { localStorage.setItem(CARDS_KEY, JSON.stringify(cards)); } catch (e) {} };
+  // cards caught on the very day they first started dropping get a little star
+  const DAY1_KEY = 'crateday-cards-day1';
+  let day1 = {}; try { day1 = JSON.parse(localStorage.getItem(DAY1_KEY)) || {}; } catch (e) {}
+  const releaseDaysOut = id => 65 - CARD_IDS.indexOf(id);           // card 001 drops from 65 days out ... SP13 from 1 day out
+  const onReleaseDay = id => CARD_IDS.includes(id) && daysOut() === releaseDaysOut(id);
   const haveAll = () => CARD_IDS.every(id => cards[id]);
   const cardLabel = id => id === 'Gold' ? 'THE GOLD SNAPPER' : id.startsWith('SP') ? 'SPECIAL · ' + id : 'CARD #' + id;
   const isSpecial = id => id.startsWith('SP');
@@ -1572,9 +1626,10 @@
 
   function collectCard(id){
     const isNew = !cards[id]; cards[id] = (cards[id] || 0) + 1; saveCards();
+    const fresh1 = onReleaseDay(id) && !day1[id]; if (onReleaseDay(id)) { day1[id] = 1; try { localStorage.setItem(DAY1_KEY, JSON.stringify(day1)); } catch (e) {} }
     const got = CARD_IDS.filter(x => cards[x]).length;
     const tag = id === 'Gold' ? (isNew ? 'YOU PULLED THE GOLD!' : 'ANOTHER GOLD?!') : isNew ? (isSpecial(id) ? 'NEW FULL ART!' : 'NEW CARD!') : 'DUPLICATE ×' + cards[id];
-    const tc = tallyCards(); const sub = id === 'Gold' ? 'THE GOLD SNAPPER' : cardLabel(id) + ' · ' + tc.got + ' / ' + tc.total + ' COLLECTED';
+    const tc = tallyCards(); const sub = id === 'Gold' ? 'THE GOLD SNAPPER' : (fresh1 ? '★ RELEASE DAY PULL · ' : '') + cardLabel(id) + ' · ' + tc.got + ' / ' + tc.total + ' COLLECTED';
     showCard(id, { flip: true, tag, sub });
     if (isNew) setTimeout(() => { if (id !== 'Gold') SFX.achieve(); if (isSpecial(id) || id === 'Gold') { slamFlash(); rain(id === 'Gold' ? 4000 : 1800); } }, 1000);
     if (isNew && got === 65 && id !== 'Gold') setTimeout(() => { revealSub.textContent = 'FULL SET! KEEP AN EYE OUT FOR SOMETHING GOLDEN…'; }, 1300);
@@ -1603,8 +1658,8 @@
       b.disabled = !got;
       const label = gold ? 'GOLD' : id.startsWith('SP') ? id : '#' + id;
       const when = gold ? 'COLLECT THEM ALL' : inDays === 1 ? 'TOMORROW' : 'IN ' + inDays + ' DAYS';
-      b.setAttribute('aria-label', got ? cardLabel(id) + (cards[id] > 1 ? ', ' + cards[id] + ' copies' : '') : label + (open ? ', not collected yet' : ', drops ' + when.toLowerCase()));
-      b.innerHTML = got ? `<img src="${CARD_IMG[id].t}" alt="" loading="lazy" draggable="false">${cards[id] > 1 ? `<i>×${cards[id]}</i>` : ''}`
+      b.setAttribute('aria-label', got ? cardLabel(id) + (cards[id] > 1 ? ', ' + cards[id] + ' copies' : '') + (day1[id] ? ', caught on release day' : '') : label + (open ? ', not collected yet' : ', drops ' + when.toLowerCase()));
+      b.innerHTML = got ? `<img src="${CARD_IMG[id].t}" alt="" loading="lazy" draggable="false">${day1[id] ? '<em title="Caught on release day">★</em>' : ''}${cards[id] > 1 ? `<i>×${cards[id]}</i>` : ''}`
                         : `<img src="${CARD_IMG[gold ? 'Gold' : 'Back'].t}" alt="" loading="lazy" draggable="false"><b>${gold ? '?' : label}</b>${open ? '' : `<small>${when}</small>`}`;
       if (gold && !got) b.querySelector('img').style.filter = 'grayscale(1) brightness(.15) blur(3px)';
     });
@@ -1620,7 +1675,7 @@
   }
   let binderReady = false;
   renderBinder(); checkAch(true);                                // cards already in the tab count, quietly
-  const resetTab = () => { cards = {}; try { localStorage.removeItem(CARDS_KEY); } catch (err) {} renderBinder(); slamFlash(); };
+  const resetTab = () => { cards = {}; day1 = {}; try { localStorage.removeItem(CARDS_KEY); localStorage.removeItem(DAY1_KEY); } catch (err) {} renderBinder(); slamFlash(); };
   twoTap(document.getElementById('tabReset'), resetTab);
   setInterval(() => renderBinder(), 60000);
 
@@ -1633,14 +1688,15 @@
       .testpanel.min h5{margin:0} .testpanel.min .tp-body{display:none}
       .testpanel button,.testpanel a{display:block;width:100%;margin:5px 0 0;padding:7px 8px;border-radius:6px;border:1px solid #2c5;background:#132;color:#dfe;font:inherit;text-align:left;cursor:pointer;text-decoration:none}
       .testpanel button:hover,.testpanel a:hover{background:#1d4}
+      .testpanel .tp-tog.off{background:#311;border-color:#a44;color:#fbb}
       .testpanel .tp-note{margin-top:8px;color:#8a9;font-weight:500;font-size:10px;line-height:1.35}`;
     document.head.appendChild(css);
     const tp = document.createElement('div'); tp.className = 'testpanel';
     tp.innerHTML = `<h5>TEST MODE <span>–</span></h5><div class="tp-body">
       <button data-t="ach">Unlock all achievements</button><button data-t="cards">Collect every card + gold</button>
-      <button data-t="card">Drop a card now</button><button data-t="gold">Drop the gold now</button>
+      <button data-t="fdrinks" class="tp-tog"></button><button data-t="fcards" class="tp-tog"></button><button data-t="card">Drop a card now</button><button data-t="gold">Drop the gold now</button>
       <button data-t="bo">Black out now</button><button data-t="yt">Black out → Skyrim</button>
-      <button data-t="tab">Reset The Tab</button><button data-t="wipe">Wipe test data</button><button data-t="exit">Exit test mode</button>
+      <button data-t="stars">Add ★ to every collected card</button><button data-t="tab">Reset The Tab</button><button data-t="wipe">Wipe test data</button><button data-t="exit">Exit test mode</button>
       <div class="tp-note">Every card is in the pool and cards drop often. Anything you do here is saved separately from the real site.</div></div>`;
     document.body.appendChild(tp);
     tp.addEventListener('click', e => { e.stopPropagation(); });
@@ -1649,10 +1705,18 @@
     const act = {
       ach(){ ACH.forEach(a => unlock(a.id, true)); renderAch(); toastQ.push({ name:'EVERYTHING', desc:'All achievements unlocked (test)', glyph:'✦' }); nextToast(); },
       cards(){ [...CARD_IDS, 'Gold'].forEach(id => { cards[id] = Math.max(1, cards[id] || 0); }); saveCards(); renderBinder(); checkAch(); slamFlash(); burst(innerWidth / 2, innerHeight / 2, 40); },
-      card(){ dropCard(); }, tab(){ cards = {}; saveCards(); renderBinder(); }, gold(){ dropCard('Gold'); }, exit(){ setTestMode(false); },
+      fdrinks(){ testFall.drinks = !testFall.drinks; saveFall(); if (!testFall.drinks) document.querySelectorAll('.bottle:not(.card)').forEach(el => el.remove()); },
+      fcards(){ testFall.cards = !testFall.cards; saveFall(); if (!testFall.cards) document.querySelectorAll('.bottle.card').forEach(el => el.remove()); },
+      card(){ dropCard(); },
+      stars(){ CARD_IDS.forEach(id => { if (cards[id]) day1[id] = 1; }); try { localStorage.setItem(DAY1_KEY, JSON.stringify(day1)); } catch (e) {} renderBinder(); }, tab(){ cards = {}; day1 = {}; saveCards(); try { localStorage.removeItem(DAY1_KEY); } catch (e) {} renderBinder(); }, gold(){ dropCard('Gold'); }, exit(){ setTestMode(false); },
       bo(){ blackout(); }, yt(){ forceYt = true; blackout(); },
       wipe(){ Object.keys(localStorage).filter(k => k.startsWith('crateday-test:')).forEach(k => Storage.prototype.removeItem.call(localStorage, k.slice('crateday-test:'.length))); location.reload(); }
     };
+    const saveFall = () => { try { localStorage.setItem('crateday-testfall', JSON.stringify(testFall)); } catch (e) {} renderFall(); };
+    const renderFall = () => { tp.querySelector('[data-t=fdrinks]').textContent = 'Falling drinks: ' + (testFall.drinks ? 'ON' : 'OFF');
+      tp.querySelector('[data-t=fcards]').textContent = 'Falling cards: ' + (testFall.cards ? 'ON' : 'OFF');
+      tp.querySelector('[data-t=fdrinks]').classList.toggle('off', !testFall.drinks); tp.querySelector('[data-t=fcards]').classList.toggle('off', !testFall.cards); };
+    renderFall();
     tp.querySelectorAll('button[data-t]').forEach(b => b.addEventListener('click', () => act[b.dataset.t]()));
   }
 
@@ -1660,7 +1724,7 @@
   const bPrev = document.getElementById('bPrev'), bNext = document.getElementById('bNext'), bView = document.getElementById('bView');
   const isAll = () => binderGrid.classList.contains('all');
   binderGrid.addEventListener('click', e => { const sl = e.target.closest('.slot'); if (!sl) return; e.stopPropagation();
-    const id = sl.dataset.id; if (cards[id]) showCard(id, { tag: cards[id] > 1 ? '×' + cards[id] : '', sub: cardLabel(id) }); });
+    const id = sl.dataset.id; if (cards[id]) showCard(id, { tag: cards[id] > 1 ? '×' + cards[id] : '', sub: (day1[id] ? '★ RELEASE DAY PULL · ' : '') + cardLabel(id) }); });
   const originals = () => [...binderGrid.querySelectorAll('.slot:not(.clone):not([hidden])')];
   const stepW = () => { const o = originals(); return o.length > 1 ? o[1].offsetLeft - o[0].offsetLeft : 1; };
   const setW = () => originals().length * stepW();
